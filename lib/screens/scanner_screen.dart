@@ -1,17 +1,16 @@
-import 'dart:typed_data';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
 import 'package:google_mlkit_text_recognition/google_mlkit_text_recognition.dart';
 
-class CameraScreen extends StatefulWidget {
-  const CameraScreen({Key? key}) : super(key: key);
+class ScannerScreen extends StatefulWidget {
+  const ScannerScreen({super.key});
 
   @override
-  State<CameraScreen> createState() => _CameraScreenState();
+  State<ScannerScreen> createState() => _ScannerScreenState();
 }
 
-class _CameraScreenState extends State<CameraScreen> {
+class _ScannerScreenState extends State<ScannerScreen> {
   late CameraController _cameraController;
   bool _isDetecting = false;
   final textRecognizer = TextRecognizer();

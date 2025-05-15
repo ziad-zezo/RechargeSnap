@@ -1,8 +1,8 @@
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
-import 'package:recharge_snap/screens/camera_screen_not_userd.dart';
 import 'package:recharge_snap/screens/home_page.dart';
 import 'package:recharge_snap/screens/onboarding_screen.dart';
+import 'package:recharge_snap/screens/scanner_screen.dart';
 import 'package:recharge_snap/services/onboarding_service.dart';
 
 late List<CameraDescription> cameras;

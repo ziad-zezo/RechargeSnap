@@ -92,7 +92,9 @@ class _HomePageState extends State<HomePage> {
               ElevatedButton(
                 onPressed: () async {
                   final result = await Navigator.of(context).push(
-                    MaterialPageRoute(builder: (context) => CameraScreen()),
+                    MaterialPageRoute(
+                      builder: (context) => const ScannerScreen(),
+                    ),
                   );
                   print("The vlue is ${result.toString()}");
                   setState(() {
