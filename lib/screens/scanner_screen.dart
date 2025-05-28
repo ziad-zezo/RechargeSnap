@@ -15,6 +15,7 @@ class _ScannerScreenState extends State<ScannerScreen> {
   bool _isDetecting = false;
   final textRecognizer = TextRecognizer();
   bool _isCameraInitialized = false;
+  String? _matchedNumber; // Store the matched number
 
   @override
   void initState() {
@@ -28,19 +29,29 @@ class _ScannerScreenState extends State<ScannerScreen> {
 
     _cameraController = CameraController(
       camera,
-      ResolutionPreset.high, // رفع الدقة لتحسين القراءة
+      ResolutionPreset.high,
       enableAudio: false,
     );
 
-    await _cameraController.initialize();
+    try {
+      await _cameraController.initialize();
+      if (!mounted) return;
 
-    if (!mounted) return;
+      setState(() {
+        _isCameraInitialized = true;
+      });
 
-    setState(() {
-      _isCameraInitialized = true;
-    });
-
-    _startImageStream();
+      _startImageStream();
+    } catch (e) {
+      print("The initial  is ${e}");
+      //if camera permission denied
+      if (e.toString().contains("CameraAccessDenied")) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text("Camera Access Denied")));
+      }
+      Navigator.pop(context);
+    }
   }
 
   void _startImageStream() {
@@ -59,7 +70,7 @@ class _ScannerScreenState extends State<ScannerScreen> {
             InputImageRotationValue.fromRawValue(
               _cameraController.description.sensorOrientation,
             ) ??
-            InputImageRotation.rotation0deg;
+            InputImageRotation.rotation90deg;
 
         final format =
             InputImageFormatValue.fromRawValue(image.format.raw) ??
@@ -76,18 +87,21 @@ class _ScannerScreenState extends State<ScannerScreen> {
         );
 
         final recognizedText = await textRecognizer.processImage(inputImage);
-
         String fullText = recognizedText.text.replaceAll(RegExp(r'\s+'), '');
 
         final matchedNumber = RegExp(
           r'\d{12,16}',
         ).firstMatch(fullText)?.group(0);
 
-        if (matchedNumber != null) {
+        if (matchedNumber != null && matchedNumber != _matchedNumber) {
+          _matchedNumber = matchedNumber;
           await _cameraController.stopImageStream();
+
           if (!mounted) return;
-          Navigator.pop(context, matchedNumber);
-          return;
+
+          // Remove the SnackBar as we're using a dialog now
+          await _showResultDialog(matchedNumber);
+          _startImageStream();
         }
       } catch (e) {
         debugPrint("Error during text recognition: $e");
@@ -95,6 +109,85 @@ class _ScannerScreenState extends State<ScannerScreen> {
         _isDetecting = false;
       }
     });
+  }
+
+  Future<void> _showResultDialog(String matchedNumber) async {
+    if (!mounted) return;
+    await showDialog(
+      barrierDismissible: false,
+      context: context,
+      builder:
+          (context) => AlertDialog(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20),
+            ),
+            elevation: 10,
+            backgroundColor: Colors.white,
+            icon: const Icon(Icons.check_circle, color: Colors.green, size: 48),
+            title: const Text(
+              'Number Detected!',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  matchedNumber,
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                const SizedBox(height: 20),
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Colors.grey[200],
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: const Text(
+                    'Please verify the number before proceeding',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(fontSize: 14),
+                  ),
+                ),
+              ],
+            ),
+            actionsAlignment: MainAxisAlignment.spaceAround,
+            actions: [
+              ElevatedButton.icon(
+                icon: const Icon(Icons.refresh, size: 20),
+                label: const Text('Retry'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.orange,
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
+                onPressed: () {
+                  Navigator.pop(context);
+                  _matchedNumber = null;
+                  // _startImageStream();
+                },
+              ),
+              ElevatedButton.icon(
+                icon: const Icon(Icons.check, size: 20),
+                label: const Text('Done'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.green,
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
+                onPressed: () {
+                  Navigator.of(context).popUntil((route) => route.isFirst);
+                },
+              ),
+            ],
+          ),
+    );
   }
 
   @override
@@ -107,11 +200,41 @@ class _ScannerScreenState extends State<ScannerScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Scan Card')),
-      body:
-          _isCameraInitialized
-              ? CameraPreview(_cameraController)
-              : const Center(child: CircularProgressIndicator()),
+      appBar: AppBar(
+        title: const Text('Scan Card'),
+        backgroundColor: Colors.deepPurple,
+      ),
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [
+              Color.fromARGB(255, 74, 48, 219),
+              Color.fromARGB(150, 250, 183, 59),
+            ],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+        ),
+        child:
+            _isCameraInitialized
+                ? Center(
+                  child: Container(
+                    height: MediaQuery.of(context).size.width,
+                    width: MediaQuery.of(context).size.width * 0.9,
+                    decoration: BoxDecoration(
+                      border: Border.all(color: Colors.white, width: 2),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(8),
+                      child: CameraPreview(_cameraController),
+                    ),
+                  ),
+                )
+                : const Center(
+                  child: CircularProgressIndicator(color: Colors.white),
+                ),
+      ),
     );
   }
 }
