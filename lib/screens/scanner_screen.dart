@@ -1,7 +1,10 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_mlkit_text_recognition/google_mlkit_text_recognition.dart';
+import 'package:recharge_snap/cubit/scanner_cubit.dart';
+import 'package:recharge_snap/widgets/custom_elevated_button.dart';
 
 class ScannerScreen extends StatefulWidget {
   const ScannerScreen({super.key});
@@ -43,8 +46,9 @@ class _ScannerScreenState extends State<ScannerScreen> {
 
       _startImageStream();
     } catch (e) {
-      print("The initial  is ${e}");
       //if camera permission denied
+      if (!mounted) return;
+
       if (e.toString().contains("CameraAccessDenied")) {
         ScaffoldMessenger.of(
           context,
@@ -155,33 +159,28 @@ class _ScannerScreenState extends State<ScannerScreen> {
             ),
             actionsAlignment: MainAxisAlignment.spaceAround,
             actions: [
-              ElevatedButton.icon(
+              CustomElevatedButton(
+                color: Colors.orange,
                 icon: const Icon(Icons.refresh, size: 20),
-                label: const Text('Retry'),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.orange,
-                  foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                ),
+                label: "Retry",
                 onPressed: () {
                   Navigator.pop(context);
                   _matchedNumber = null;
-                  // _startImageStream();
                 },
               ),
-              ElevatedButton.icon(
+              CustomElevatedButton(
+                color: Colors.green,
                 icon: const Icon(Icons.check, size: 20),
-                label: const Text('Done'),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.green,
-                  foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                ),
+                label: "Done",
                 onPressed: () {
+                  context.read<ScannerCubit>().doneScan(matchedNumber);
+                  try {
+                    print("Done from Scanner Screen ${matchedNumber}");
+                  } catch (e) {
+                    print("done frome ex");
+                  }
+
+                  print("not try done from");
                   Navigator.of(context).popUntil((route) => route.isFirst);
                 },
               ),

@@ -1,5 +1,7 @@
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:recharge_snap/cubit/scanner_cubit.dart';
 import 'package:recharge_snap/screens/home_page.dart';
 import 'package:recharge_snap/screens/onboarding_screen.dart';
 import 'package:recharge_snap/screens/scanner_screen.dart';
@@ -23,17 +25,22 @@ class RechargeSnap extends StatelessWidget {
   final bool onboardingCompleted;
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Recharge Snap',
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData(primarySwatch: Colors.blue),
-      routes: {
-        '/home': (context) => HomePage(),
-        '/onboarding': (context) => const OnboardingScreen(),
-        '/scannerScreen': (context) => const ScannerScreen(),
-      },
-      initialRoute:
-          onboardingCompleted ? HomePage.routeName : OnboardingScreen.routeName,
+    return BlocProvider(
+      create: (context) => ScannerCubit(),
+      child: MaterialApp(
+        title: 'Recharge Snap',
+        debugShowCheckedModeBanner: false,
+        theme: ThemeData(primarySwatch: Colors.blue),
+        routes: {
+          '/home': (context) => HomePage(),
+          '/onboarding': (context) => const OnboardingScreen(),
+          '/scannerScreen': (context) => const ScannerScreen(),
+        },
+        initialRoute:
+            onboardingCompleted
+                ? HomePage.routeName
+                : OnboardingScreen.routeName,
+      ),
     );
   }
 }

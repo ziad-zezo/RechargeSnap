@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:recharge_snap/cubit/scanner_cubit.dart';
 import 'package:recharge_snap/screens/scanner_screen.dart';
+import 'package:recharge_snap/widgets/custom_action_button.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class HomePage extends StatefulWidget {
@@ -20,7 +23,7 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     final Size size = MediaQuery.of(context).size;
-    final bool isDark = Theme.of(context).brightness == Brightness.dark;
+    //final bool isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
       appBar: AppBar(
@@ -31,6 +34,16 @@ class _HomePageState extends State<HomePage> {
         centerTitle: true,
         elevation: 0,
         backgroundColor: Colors.transparent,
+        actions: [
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: IconButton(
+              onPressed: () {},
+              icon: Icon(Icons.settings_sharp),
+              color: Colors.black,
+            ),
+          ),
+        ],
       ),
       extendBodyBehindAppBar: true,
       body: Container(
@@ -52,99 +65,155 @@ class _HomePageState extends State<HomePage> {
                 children: [
                   SizedBox(height: 50),
                   // Provider Selection Card
-                  Card(
-                    elevation: 4,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(15),
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 16.0,
-                        vertical: 8,
-                      ),
-                      child: DropdownButtonHideUnderline(
-                        child: DropdownButton<String>(
-                          borderRadius: BorderRadius.circular(15),
-
-                          isExpanded: true,
-                          enableFeedback: true,
-                          underline: Text("Zia ddd"),
-                          value: _selectedProvider,
-                          hint: Text(
-                            "Select Provider",
-                            style: TextStyle(color: Colors.red),
+                  Row(
+                    children: [
+                      //!DropDownMenu
+                      Expanded(
+                        child: Card(
+                          elevation: 4,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(15),
                           ),
-                          
-                          items: [
-                            _buildDropdownItem(
-                              "Etisalat",
-                              "etisalat",
-                              "assets/logos/etisalat.png",
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 16.0,
+                              vertical: 8,
                             ),
-                            _buildDropdownItem(
-                              "Vodafone",
-                              "vodafone",
-                              "assets/logos/vodafone.png",
+                            child: DropdownButtonHideUnderline(
+                              child: DropdownButton<String>(
+                                borderRadius: BorderRadius.circular(15),
+
+                                isExpanded: true,
+                                enableFeedback: true,
+                                underline: Text("Zia ddd"),
+                                value: _selectedProvider,
+                                hint: Text(
+                                  "Select Provider",
+                                  style: TextStyle(color: Colors.red),
+                                ),
+
+                                items: [
+                                  _buildDropdownItem(
+                                    "Etisalat",
+                                    "etisalat",
+                                    "assets/logos/etisalat.png",
+                                  ),
+                                  _buildDropdownItem(
+                                    "Vodafone",
+                                    "vodafone",
+                                    "assets/logos/vodafone.png",
+                                  ),
+                                  _buildDropdownItem(
+                                    "We",
+                                    "we",
+                                    "assets/logos/we.png",
+                                  ),
+                                  _buildDropdownItem(
+                                    "Orange",
+                                    "orange",
+                                    "assets/logos/orange.png",
+                                  ),
+                                ],
+                                onChanged:
+                                    (value) => setState(
+                                      () => _selectedProvider = value,
+                                    ),
+                              ),
                             ),
-                            _buildDropdownItem(
-                              "We",
-                              "we",
-                              "assets/logos/we.png",
-                            ),
-                            _buildDropdownItem(
-                              "Orange",
-                              "orange",
-                              "assets/logos/orange.png",
-                            ),
-                          ],
-                          onChanged:
-                              (value) =>
-                                  setState(() => _selectedProvider = value),
+                          ),
                         ),
                       ),
-                    ),
+                      //*DropDownMenu
+                      //!
+                      //*Scan Button
+                      SizedBox(
+                        width: 130,
+                        child: ElevatedButton(
+                          onPressed: () async {
+                            final result = await Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => const ScannerScreen(),
+                              ),
+                            );
+                            if (result != null) {
+                              setState(() {
+                                _scannedText = result.toString();
+                                _cardCodeController.text = _scannedText;
+                              });
+                            }
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.white,
+                            foregroundColor: Colors.blue[800],
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            padding: const EdgeInsets.symmetric(
+                              vertical: 16,
+                              horizontal: 4,
+                            ),
+                            elevation: 3,
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(Icons.qr_code_scanner, size: 24),
+                              const SizedBox(width: 10),
+                              Text(
+                                "SCAN",
+                                style: TextStyle(fontWeight: FontWeight.bold),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
 
                   const SizedBox(height: 80),
 
                   // Scan Button
-                  ElevatedButton(
-                    onPressed: () async {
-                      final result = await Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const ScannerScreen(),
+                  SizedBox(
+                    width: 130,
+                    child: ElevatedButton(
+                      onPressed: () async {
+                        final result = await Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const ScannerScreen(),
+                          ),
+                        );
+                        if (result != null) {
+                          setState(() {
+                            _scannedText = result.toString();
+                            _cardCodeController.text = _scannedText;
+                          });
+                        }
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.white,
+                        foregroundColor: Colors.blue[800],
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
                         ),
-                      );
-                      if (result != null) {
-                        setState(() {
-                          _scannedText = result.toString();
-                          _cardCodeController.text = _scannedText;
-                        });
-                      }
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.white,
-                      foregroundColor: Colors.blue[800],
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      padding: const EdgeInsets.symmetric(
-                        vertical: 16,
-                        horizontal: 32,
-                      ),
-                      elevation: 3,
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(Icons.qr_code_scanner, size: 24),
-                        const SizedBox(width: 10),
-                        Text(
-                          "SCAN CARD",
-                          style: TextStyle(fontWeight: FontWeight.bold),
+                        padding: const EdgeInsets.symmetric(
+                          vertical: 16,
+                          horizontal: 4,
                         ),
-                      ],
+                        elevation: 3,
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(Icons.qr_code_scanner, size: 24),
+                          const SizedBox(width: 10),
+                          Text(
+                            "SCAN CARD",
+                            style: TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
 
@@ -161,44 +230,88 @@ class _HomePageState extends State<HomePage> {
                   ),
 
                   const SizedBox(height: 15),
-
-                  Container(
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(12),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black12,
-                          blurRadius: 10,
-                          offset: Offset(0, 4),
+                  Row(
+                    children: [
+                      //*TextField
+                      Expanded(
+                        child: Container(
+                          height: 55,
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(12),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black12,
+                                blurRadius: 10,
+                                offset: Offset(0, 4),
+                              ),
+                            ],
+                          ),
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 16.0,
+                            ),
+                            child: BlocBuilder<ScannerCubit, ScannerState>(
+                              builder: (context, state) {
+                                if (state is NumberDetected) {
+                                  _cardCodeController.text =
+                                      state.detectedNumber;
+                                }
+                                return TextField(
+                                  textAlignVertical: TextAlignVertical.center,
+                                  controller: _cardCodeController,
+                                  decoration: InputDecoration(
+                                    border: InputBorder.none,
+                                    hintText: "Enter card number",
+                                    contentPadding: EdgeInsets.symmetric(
+                                      vertical: 8,
+                                    ),
+                                    //alignLabelWithHint: true,
+                                    suffixIcon:
+                                        _cardCodeController.text.isNotEmpty
+                                            ? IconButton(
+                                              icon: Icon(
+                                                Icons.clear,
+                                                color: Colors.grey,
+                                              ),
+                                              onPressed: () {
+                                                _cardCodeController.clear();
+                                                setState(() {});
+                                              },
+                                            )
+                                            : null,
+                                  ),
+                                  keyboardType: TextInputType.number,
+                                  inputFormatters: [
+                                    FilteringTextInputFormatter.digitsOnly,
+                                  ],
+                                  onChanged: (value) => setState(() {}),
+                                );
+                              },
+                            ),
+                          ),
                         ),
-                      ],
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                      child: TextField(
-                        controller: _cardCodeController,
-                        decoration: InputDecoration(
-                          border: InputBorder.none,
-                          hintText: "Enter card number",
-                          suffixIcon:
-                              _cardCodeController.text.isNotEmpty
-                                  ? IconButton(
-                                    icon: Icon(Icons.clear, color: Colors.grey),
-                                    onPressed: () {
-                                      _cardCodeController.clear();
-                                      setState(() {});
-                                    },
-                                  )
-                                  : null,
-                        ),
-                        keyboardType: TextInputType.number,
-                        inputFormatters: [
-                          FilteringTextInputFormatter.digitsOnly,
-                        ],
-                        onChanged: (value) => setState(() {}),
                       ),
-                    ),
+                      //*TextField
+                      //!Copy Icon
+                      AnimatedContainer(
+                        curve: Curves.easeIn,
+                        duration: Duration(milliseconds: 200),
+                        width: _cardCodeController.text.isNotEmpty ? 50 : 0,
+                        child: ClipRRect(
+                          child: CustomActionButton(
+                            icon: Icons.copy,
+                            label: "Copy",
+                            color: Colors.white,
+                            iconSize: 18,
+                            fontSize: 13,
+                            onPressed:
+                                () =>
+                                    _copyToClipboard(_cardCodeController.text),
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
 
                   const SizedBox(height: 20),
@@ -207,14 +320,8 @@ class _HomePageState extends State<HomePage> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      _buildActionButton(
-                        icon: Icons.copy,
-                        label: "Copy",
-                        onPressed:
-                            () => _copyToClipboard(_cardCodeController.text),
-                      ),
                       const SizedBox(width: 15),
-                      _buildActionButton(
+                      CustomActionButton(
                         icon: Icons.call,
                         label: "Call",
                         onPressed:
@@ -225,7 +332,7 @@ class _HomePageState extends State<HomePage> {
 
                   const SizedBox(height: 30),
 
-                  // Submit Button
+                  // *Submit Button
                   if (_cardCodeController.text.isNotEmpty &&
                       _selectedProvider != null)
                     SizedBox(
@@ -279,26 +386,11 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  Widget _buildActionButton({
-    required IconData icon,
-    required String label,
-    required VoidCallback onPressed,
-  }) {
-    return Column(
-      children: [
-        IconButton(
-          icon: Icon(icon, size: 28),
-          color: Colors.white,
-          onPressed: onPressed,
-        ),
-        Text(label, style: TextStyle(color: Colors.white70)),
-      ],
-    );
-  }
-
   Future<void> _copyToClipboard(String text) async {
     if (text.isEmpty) return;
     await Clipboard.setData(ClipboardData(text: text));
+
+    if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text('Copied to clipboard'),
@@ -316,6 +408,7 @@ class _HomePageState extends State<HomePage> {
         await launchUrl(phoneUri);
       }
     } catch (e) {
+      if (!mounted) return;
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(SnackBar(content: Text('Could not launch phone app')));
