@@ -175,7 +175,7 @@ class _ScannerScreenState extends State<ScannerScreen> {
                 onPressed: () {
                   context.read<ScannerCubit>().doneScan(matchedNumber);
                   try {
-                    print("Done from Scanner Screen ${matchedNumber}");
+                    print("Done from Scanner Screen $matchedNumber");
                   } catch (e) {
                     print("done frome ex");
                   }

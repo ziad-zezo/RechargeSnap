@@ -1,21 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:recharge_snap/cubit/scanner_cubit.dart';
 import 'package:recharge_snap/screens/scanner_screen.dart';
 import 'package:recharge_snap/widgets/custom_action_button.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-class HomePage extends StatefulWidget {
+class HomeScreen extends StatefulWidget {
   static const routeName = '/home';
   final String? detectedNumber;
-  const HomePage({super.key, this.detectedNumber});
+  const HomeScreen({super.key, this.detectedNumber});
 
   @override
-  State<HomePage> createState() => _HomePageState();
+  State<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomePageState extends State<HomePage> {
+class _HomeScreenState extends State<HomeScreen> {
   final _cardCodeController = TextEditingController();
   String? _selectedProvider;
   String _scannedText = "Scan a card or enter manually";
@@ -23,7 +24,6 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     final Size size = MediaQuery.of(context).size;
-    //final bool isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
       appBar: AppBar(
@@ -34,12 +34,20 @@ class _HomePageState extends State<HomePage> {
         centerTitle: true,
         elevation: 0,
         backgroundColor: Colors.transparent,
+        leading: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: IconButton(
+            onPressed: () => Navigator.pushNamed(context, '/aboutScreen'),
+            icon: Icon(Icons.info_outlined),
+            color: Colors.black,
+          ),
+        ),
         actions: [
           Padding(
             padding: const EdgeInsets.all(8.0),
             child: IconButton(
               onPressed: () {},
-              icon: Icon(Icons.settings_sharp),
+              icon: Icon(Icons.settings_outlined),
               color: Colors.black,
             ),
           ),
@@ -171,52 +179,7 @@ class _HomePageState extends State<HomePage> {
                     ],
                   ),
 
-                  const SizedBox(height: 80),
-
                   // Scan Button
-                  SizedBox(
-                    width: 130,
-                    child: ElevatedButton(
-                      onPressed: () async {
-                        final result = await Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const ScannerScreen(),
-                          ),
-                        );
-                        if (result != null) {
-                          setState(() {
-                            _scannedText = result.toString();
-                            _cardCodeController.text = _scannedText;
-                          });
-                        }
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.white,
-                        foregroundColor: Colors.blue[800],
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        padding: const EdgeInsets.symmetric(
-                          vertical: 16,
-                          horizontal: 4,
-                        ),
-                        elevation: 3,
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(Icons.qr_code_scanner, size: 24),
-                          const SizedBox(width: 10),
-                          Text(
-                            "SCAN CARD",
-                            style: TextStyle(fontWeight: FontWeight.bold),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-
                   const SizedBox(height: 30),
 
                   // Card Number Input
@@ -253,10 +216,6 @@ class _HomePageState extends State<HomePage> {
                             ),
                             child: BlocBuilder<ScannerCubit, ScannerState>(
                               builder: (context, state) {
-                                if (state is NumberDetected) {
-                                  _cardCodeController.text =
-                                      state.detectedNumber;
-                                }
                                 return TextField(
                                   textAlignVertical: TextAlignVertical.center,
                                   controller: _cardCodeController,
@@ -266,7 +225,7 @@ class _HomePageState extends State<HomePage> {
                                     contentPadding: EdgeInsets.symmetric(
                                       vertical: 8,
                                     ),
-                                    //alignLabelWithHint: true,
+
                                     suffixIcon:
                                         _cardCodeController.text.isNotEmpty
                                             ? IconButton(
@@ -295,8 +254,8 @@ class _HomePageState extends State<HomePage> {
                       //*TextField
                       //!Copy Icon
                       AnimatedContainer(
-                        curve: Curves.easeIn,
-                        duration: Duration(milliseconds: 200),
+                        curve: Curves.easeInToLinear,
+                        duration: Duration(milliseconds: 300),
                         width: _cardCodeController.text.isNotEmpty ? 50 : 0,
                         child: ClipRRect(
                           child: CustomActionButton(
@@ -316,49 +275,91 @@ class _HomePageState extends State<HomePage> {
 
                   const SizedBox(height: 20),
 
-                  // Action Buttons
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const SizedBox(width: 15),
-                      CustomActionButton(
-                        icon: Icons.call,
-                        label: "Call",
-                        onPressed:
-                            () => _makePhoneCall(_cardCodeController.text),
-                      ),
-                    ],
-                  ),
-
                   const SizedBox(height: 30),
 
-                  // *Submit Button
-                  if (_cardCodeController.text.isNotEmpty &&
-                      _selectedProvider != null)
-                    SizedBox(
-                      width: double.infinity,
-                      child: ElevatedButton(
-                        onPressed: () {
-                          // Handle recharge submission
-                          _showSuccessDialog();
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.green,
-                          foregroundColor: Colors.white,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
+                  // *Recharge Button
+                  AnimatedContainer(
+                    duration: Duration(milliseconds: 600),
+                    curve: Curves.easeOutSine,
+                    padding: const EdgeInsets.symmetric(vertical: 14.0),
+                    width:
+                        isValidNumber() ? size.width * 0.5 : size.width * 0.14,
+                    decoration: BoxDecoration(
+                      border: Border.all(
+                        color: isValidNumber() ? Colors.black : Colors.black38,
+                        width: 1,
+                      ),
+                      borderRadius: BorderRadius.circular(
+                        isValidNumber() ? 12 : 45,
+                      ),
+                      // shape: BoxShape.circle,
+                      gradient:
+                          isValidNumber()
+                              ? LinearGradient(
+                                colors: [
+                                  Color.fromARGB(255, 25, 131, 26),
+                                  Color.fromARGB(255, 11, 245, 15),
+                                  //Color.fromARGB(241, 2, 125, 150),
+                                ],
+                                begin: Alignment.topLeft,
+                                end: Alignment.bottomRight,
+                              )
+                              : LinearGradient(
+                                colors: [
+                                  Color.fromARGB(255, 71, 66, 97),
+                                  Color.fromARGB(255, 42, 44, 44),
+                                ],
+                                begin: Alignment.topRight,
+                                end: Alignment.bottomLeft,
+                              ),
+                    ),
+
+                    child: Center(
+                      child: Row(
+                        mainAxisAlignment:
+                            isValidNumber()
+                                ? MainAxisAlignment.center
+                                : MainAxisAlignment.center,
+                        children: [
+                          //*Icon
+                          Padding(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 10.0,
+                            ),
+                            child: Icon(
+                              FontAwesomeIcons.phone,
+                              color: Colors.white,
+                              size: isValidNumber() ? 30 : 30,
+                              //size: 28,
+                            ),
                           ),
-                          padding: const EdgeInsets.symmetric(vertical: 16),
-                        ),
-                        child: Text(
-                          "CONFIRM RECHARGE",
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
+
+                          //*Text
+                          Flexible(
+                            child: AnimatedContainer(
+                              duration: Duration(milliseconds: 600),
+
+                              curve: Curves.easeInOutCirc,
+                              width: isValidNumber() ? size.width * 0.3 : 0,
+                              child: Expanded(
+                                child: Text(
+                                  "Recharge Now",
+                                  maxLines: 1,
+                                  overflow: TextOverflow.clip,
+                                  softWrap: false,
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                              ),
+                            ),
                           ),
-                        ),
+                        ],
                       ),
                     ),
+                  ),
                 ],
               ),
             ),
@@ -452,5 +453,9 @@ class _HomePageState extends State<HomePage> {
             ],
           ),
     );
+  }
+
+  bool isValidNumber() {
+    return _cardCodeController.text.length > 5 && _selectedProvider != null;
   }
 }

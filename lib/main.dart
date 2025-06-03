@@ -2,7 +2,8 @@ import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:recharge_snap/cubit/scanner_cubit.dart';
-import 'package:recharge_snap/screens/home_page.dart';
+import 'package:recharge_snap/screens/about_screen.dart';
+import 'package:recharge_snap/screens/home_screen.dart';
 import 'package:recharge_snap/screens/onboarding_screen.dart';
 import 'package:recharge_snap/screens/scanner_screen.dart';
 import 'package:recharge_snap/services/onboarding_service.dart';
@@ -32,13 +33,14 @@ class RechargeSnap extends StatelessWidget {
         debugShowCheckedModeBanner: false,
         theme: ThemeData(primarySwatch: Colors.blue),
         routes: {
-          '/home': (context) => HomePage(),
+          '/home': (context) => HomeScreen(),
           '/onboarding': (context) => const OnboardingScreen(),
           '/scannerScreen': (context) => const ScannerScreen(),
+          '/aboutScreen': (context) => const AboutScreen(),
         },
         initialRoute:
             onboardingCompleted
-                ? HomePage.routeName
+                ? HomeScreen.routeName
                 : OnboardingScreen.routeName,
       ),
     );
