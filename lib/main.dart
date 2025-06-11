@@ -6,6 +6,7 @@ import 'package:recharge_snap/screens/about_screen.dart';
 import 'package:recharge_snap/screens/home_screen.dart';
 import 'package:recharge_snap/screens/onboarding_screen.dart';
 import 'package:recharge_snap/screens/scanner_screen.dart';
+import 'package:recharge_snap/screens/settings_screen.dart';
 import 'package:recharge_snap/services/onboarding_service.dart';
 
 late List<CameraDescription> cameras;
@@ -16,7 +17,7 @@ void main() async {
   final isOnboardingCompleted = await onboardingService.isOnboardingCompleted();
 
   cameras = await availableCameras();
-  debugPrint("cameras $cameras");
+  debugPrint('cameras $cameras');
 
   runApp(RechargeSnap(onboardingCompleted: isOnboardingCompleted));
 }
@@ -33,10 +34,11 @@ class RechargeSnap extends StatelessWidget {
         debugShowCheckedModeBanner: false,
         theme: ThemeData(primarySwatch: Colors.blue),
         routes: {
-          '/home': (context) => HomeScreen(),
-          '/onboarding': (context) => const OnboardingScreen(),
-          '/scannerScreen': (context) => const ScannerScreen(),
-          '/aboutScreen': (context) => const AboutScreen(),
+          HomeScreen.routeName: (context) => const HomeScreen(),
+          OnboardingScreen.routeName: (context) => const OnboardingScreen(),
+          ScannerScreen.routeName: (context) => const ScannerScreen(),
+          AboutScreen.routeName: (context) => const AboutScreen(),
+          SettingsScreen.routeName: (context) => const SettingsScreen(),
         },
         initialRoute:
             onboardingCompleted

@@ -1,0 +1,1 @@
+String defaultProvider = 'etisalat';
