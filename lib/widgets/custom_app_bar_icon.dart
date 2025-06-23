@@ -5,12 +5,13 @@ class CustomAppBarIcon extends StatelessWidget {
   const CustomAppBarIcon({
     super.key,
     required this.tooltipText,
-    required this.route,
     required this.icon,
     this.onPressed,
+    this.color = Colors.white70,
   });
+
+  final Color color;
   final String tooltipText;
-  final String route;
   final IconData icon;
   final VoidCallback? onPressed;
 
@@ -23,8 +24,8 @@ class CustomAppBarIcon extends StatelessWidget {
         padding: const EdgeInsets.all(8.0),
         child: IconButton(
           onPressed: onPressed,
-          icon: Icon(icon),
-          color: Colors.white70,
+          icon: Icon(icon, color: Colors.white, size: 22),
+          color: color,
         ),
       ),
     );

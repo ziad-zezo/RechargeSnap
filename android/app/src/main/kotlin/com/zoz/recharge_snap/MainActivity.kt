@@ -1,4 +1,4 @@
-package com.example.recharge_snap
+package com.zoz.recharge_snap
 
 import io.flutter.embedding.android.FlutterActivity
 

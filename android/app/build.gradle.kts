@@ -19,7 +19,7 @@ android {
     }
 
     defaultConfig {
-        applicationId = "com.example.new_app"
+        applicationId = "com.zoz.recharge_snap"
         minSdk = flutter.minSdkVersion
         targetSdk = 35
         versionCode = flutter.versionCode

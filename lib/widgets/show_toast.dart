@@ -8,7 +8,8 @@ void showToast({
   required ToastificationType toastType,
 }) {
   toastification.show(
-    context: context, // optional if you use ToastificationWrapper
+    context: context,
+    // optional if you use ToastificationWrapper
     title: SizedBox(
       height: 50,
       child: Row(
@@ -24,10 +25,16 @@ void showToast({
     ),
     autoCloseDuration: const Duration(seconds: 3),
     type: toastType,
+
     alignment: Alignment.bottomCenter,
     applyBlurEffect: true,
     style: ToastificationStyle.flatColored,
     icon: _getIcon(toastType: toastType),
+    margin: EdgeInsets.only(
+      bottom: MediaQuery.of(context).size.height * 0.02,
+      left: 10,
+      right: 10,
+    ),
     //description: Text(message),
   );
 }
